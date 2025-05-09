@@ -1,13 +1,18 @@
 import asyncio
 import subprocess
+import os
+from dotenv import load_dotenv
 from pyrogram import Client, filters
 from pyrogram.types import Message
 
+# Cargar variables de entorno
+load_dotenv()
+
 # Configuración
-API_ID = 14681595  # Reemplaza con tu API ID de Telegram
-API_HASH = "a86730aab5c59953c424abb4396d32d5"  # Reemplaza con tu API Hash
-BOT_TOKEN = "7725269349:AAFHd6AYWbFkUJ5OjSe2CjenMMjosD_JvD8"  # Reemplaza con el token de tu bot
-CHAT_ID = 123456789  # Reemplaza con tu ID de chat (puedes obtenerlo con /id)
+API_ID = os.getenv("API_ID")
+API_HASH = os.getenv("API_HASH")
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+CHAT_ID = os.getenv("CHAT_ID")
 
 # Crear el cliente
 app = Client(
@@ -83,7 +88,9 @@ async def manual_ping(client: Client, message: Message):
 # Manejador para mensajes que no son comandos
 @app.on_message(filters.text & ~filters.command)
 async def echo_text(client: Client, message: Message):
-    await message.reply_text(f"Recibí tu mensaje: {message.text}")
+    # Primero verificamos si el mensaje no es un comando
+    if not message.text.startswith('/'):
+        await message.reply_text(f"Recibí tu mensaje: {message.text}")
 
 # Función para iniciar el bot y la tarea de ping
 async def main():
