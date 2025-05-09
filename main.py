@@ -51,7 +51,7 @@ async def ping_task():
     while True:
         ping_result = await get_ping()
         await app.send_message(CHAT_ID, f"📊 **Ping del servidor:**\n`{ping_result}`")
-        await asyncio.sleep(60)  # Esperar 60 segundos
+        await asyncio.sleep(60)
 
 # Manejador para el comando /start
 @app.on_message(filters.command("start"))
@@ -85,24 +85,31 @@ async def manual_ping(client: Client, message: Message):
     ping_result = await get_ping()
     await message.reply_text(f"📊 **Ping actual:**\n`{ping_result}`")
 
-# Manejador para mensajes que no son comandos
-@app.on_message(filters.text & ~filters.command)
-async def echo_text(client: Client, message: Message):
-    # Primero verificamos si el mensaje no es un comando
+# Manejador para mensajes de texto que no son comandos
+@app.on_message(filters.text)
+async def handle_text_messages(client: Client, message: Message):
+    # Verificar si el mensaje no es un comando
     if not message.text.startswith('/'):
         await message.reply_text(f"Recibí tu mensaje: {message.text}")
 
-# Función para iniciar el bot y la tarea de ping
+# Función principal
 async def main():
     await app.start()
-    print("Bot iniciado...")
-    # Iniciar la tarea de ping en segundo plano
+    print("Bot iniciado correctamente!")
+    # Obtener información del bot
+    me = await app.get_me()
+    print(f"Bot: @{me.username}")
+    
+    # Iniciar la tarea de ping
     asyncio.create_task(ping_task())
-    await asyncio.Event().wait()  # Ejecutar indefinidamente
+    
+    # Mantener el bot corriendo
+    await asyncio.Event().wait()
 
-# Ejecutar el bot
 if __name__ == "__main__":
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("Bot detenido")
+        print("Bot detenido manualmente")
+    except Exception as e:
+        print(f"Error inesperado: {e}")
